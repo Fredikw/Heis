@@ -3,9 +3,8 @@
 #include <signal.h>
 #include "hardware.h"
 #include "elUtils.h"
+#include "elFSM.h"
 
 int main(){
-
-
     return 0;
 }
