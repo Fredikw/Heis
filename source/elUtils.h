@@ -9,6 +9,7 @@
  */
 #pragma once
 #include "hardware.h"
+#include "elFSM.h"
 
 /**
  * @brief Initializes the elevator control hardware.
@@ -17,18 +18,26 @@
  */
 void elUtils_init_elevator();
 
-
 /**
- * @brief Pools queue for orders
- * @return 1 for order. Zero for none.
- */
-int elUtils_check_for_orders();
-
-/**
- * @brief clear all order lights
+ * @brief clears all order lights
  */
 void elUtils_clear_all_order_lights();
 
+/**
+ * @brief clears order queue
+ */
+void elUtils_clear_order_queue(struct Elevator *e);
+
+/**
+ * @brief adds new order to elevator_queue.
+ */
+void elUtils_add_new_order(struct Elevator *e);
+
+/**
+ * @brief Polls the hardware for orders
+ * @return 1 on oder.
+ */
+int elUtils_check_for_orders();
 
 /**
  * @brief Checks if elevator reached a floor.

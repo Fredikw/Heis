@@ -1,18 +1,23 @@
 #pragma once
 #include "hardware.h"
 
-struct State 
+typedef enum {
+    IDEL,
+    MOVING,
+    DOOR_OPEN,
+} ElevatorState;
+
+struct Elevator 
 {
     int floor;
     HardwareMovement movement;
     int elevator_queue[4][3];
+    ElevatorState state;
+
 }; 
 
-
-
-void elFSM_stop(struct State *e);
-void elFSM_new_order();
-void elFSM_arrived_floor();
-void elFSM_stop();
+void elFSM_stop(struct Elevator *e);
+void elFSM_add_new_order(struct Elevator *e);
+void elFSM_arrived_floor(struct Elevator *e);
 
 void elFSM_run();
