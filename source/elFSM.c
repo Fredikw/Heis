@@ -70,6 +70,7 @@ void elFSM_stop(struct Elevator *e){
         break;
     }
 }
+
 HardwareMovement elFSM_stop_or_go(struct Elevator *e){
     if(e->movement == HARDWARE_MOVEMENT_UP){
         if(e->elevator_queue[(e->floor)-1][0] || e->elevator_queue[(e->floor)-1][1]){
@@ -146,6 +147,11 @@ void elFSM_new_order(struct Elevator *e){
     }
 }
 
+// void elFSM_time_out(struct Elevator *e){
+//     hardware_command_door_open(0);
+//     e->state=MOVING;
+// }
+
 // void elFSM_run(){
 //     struct Elevator el;
 //     elFSM_init_elevator(&el);
@@ -167,3 +173,41 @@ void elFSM_new_order(struct Elevator *e){
 //         }
 //     } while (1);
 // }
+
+
+int should_i_stop(struct Elevator *e){
+    if(e->movement == HARDWARE_MOVEMENT_UP){
+        if(e->elevator_queue[(e->floor)-1][0] || e->elevator_queue[(e->floor)-1][1]){
+            return 1;
+        }
+    }
+    if(e->movement == HARDWARE_MOVEMENT_DOWN){
+        if(e->elevator_queue[(e->floor)-1][0] || e->elevator_queue[(e->floor)-1][2]){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+HardwareMovement should_i_go_or_turn(struct Elevator *e){
+    if(e->movement == HARDWARE_MOVEMENT_UP){
+        for(int i = e->floor; i < FLOOR4; i++){
+            for(int j = 0; j < HARDWARE_NUMBER_OF_ORDER_TYPES; j++){
+                if(e->elevator_queue[i][j]){
+                    return HARDWARE_MOVEMENT_UP;
+                }
+            }
+        }
+    }
+    if(e->movement == HARDWARE_MOVEMENT_DOWN){
+        for(int i = (e->floor)-2; i >= FLOOR1-1; i--){
+            for(int j = 0; j < HARDWARE_NUMBER_OF_ORDER_TYPES; j++){
+                if(e->elevator_queue[i][j]){
+                    return HARDWARE_MOVEMENT_DOWN;
+                }
+            }
+        }
+    }
+    return HARDWARE_MOVEMENT_STOP;
+}
