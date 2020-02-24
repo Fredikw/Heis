@@ -15,7 +15,7 @@ void elFSM_init_elevator(struct Elevator *e){
     
     e->state = IDEL;
     e->floor = FLOOR1;
-    e->movement = HARDWARE_MOVEMENT_STOP;
+    e->direction = HARDWARE_MOVEMENT_STOP;
 }
 
 void elFSM_clear_order_queue(struct Elevator *e){
@@ -57,6 +57,17 @@ void elFSM_add_new_order(struct Elevator *e){
     }
 }
 
+void clear_order(struct Elevator *e){
+    hardware_command_order_light((e->floor)-1, HARDWARE_ORDER_INSIDE, 0);
+
+    if(e->direction == HARDWARE_MOVEMENT_UP){
+        hardware_command_order_light((e->floor)-1, HARDWARE_ORDER_UP, 0);
+    }
+    if(e->direction == HARDWARE_MOVEMENT_DOWN){
+        hardware_command_order_light((e->floor)-1, HARDWARE_ORDER_DOWN, 0);
+    }
+}
+
 int elFSM_check_if_arrived_new_floor(struct Elevator *e){
     if(e->floor-1 != elUtils_check_if_arrived_floor()){
         return 1;
@@ -65,12 +76,12 @@ int elFSM_check_if_arrived_new_floor(struct Elevator *e){
 }
 
 int should_i_stop(struct Elevator *e){
-    if(e->movement == HARDWARE_MOVEMENT_UP){
+    if(e->direction == HARDWARE_MOVEMENT_UP){
         if(e->elevator_queue[(e->floor)-1][0] || e->elevator_queue[(e->floor)-1][1]){
             return 1;
         }
     }
-    if(e->movement == HARDWARE_MOVEMENT_DOWN){
+    if(e->direction == HARDWARE_MOVEMENT_DOWN){
         if(e->elevator_queue[(e->floor)-1][0] || e->elevator_queue[(e->floor)-1][2]){
             return 1;
         }
@@ -82,7 +93,7 @@ int should_i_stop(struct Elevator *e){
 }
 
 int should_i_continue(struct Elevator *e){
-    if(e->movement == HARDWARE_MOVEMENT_UP){
+    if(e->direction == HARDWARE_MOVEMENT_UP){
         for(int i = e->floor; i < FLOOR4; i++){
             for(int j = 0; j < HARDWARE_NUMBER_OF_ORDER_TYPES; j++){
                 if(e->elevator_queue[i][j]){
@@ -91,7 +102,7 @@ int should_i_continue(struct Elevator *e){
             }
         }
     }
-    if(e->movement == HARDWARE_MOVEMENT_DOWN){
+    if(e->direction == HARDWARE_MOVEMENT_DOWN){
         for(int i = (e->floor)-2; i >= NONE; i--){
             for(int j = 0; j < HARDWARE_NUMBER_OF_ORDER_TYPES; j++){
                 if(e->elevator_queue[i][j]){
@@ -141,9 +152,9 @@ void elFSM_new_order(struct Elevator *e){
     switch (e->state)
     {
     case IDEL:
-        e->movement = elFSM_set_direction_for_idel(e);
+        e->direction = elFSM_set_direction_for_idel(e);
         e->state = MOVING;
-        hardware_command_movement(e->movement);
+        hardware_command_movement(e->direction);
         break;
     default:
         break;
@@ -157,10 +168,11 @@ void elFSM_arrived_new_floor(struct Elevator *e){
     switch (should_i_stop(e))
     {
     case 1:
+        clear_order(e);
         e->state = DOOR_OPEN;
         hardware_command_movement(HARDWARE_MOVEMENT_STOP);
         hardware_command_door_open(1);
-        timer_start();                                          //Blir denne satt riktig
+        timer_start();                                                   //Blir denne satt riktig
         break;
     
     default:
@@ -170,7 +182,7 @@ void elFSM_arrived_new_floor(struct Elevator *e){
 
 
 void elFSM_time_out(struct Elevator *e){
-    hardware_command_door_open(0);
+    hardware_command_door_open(0);                                         // Hvordan sjekke rettnig mest effektivt
 
 }
 
