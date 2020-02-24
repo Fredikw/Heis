@@ -14,9 +14,9 @@
 /**
 * @brief
 */
-void start_timer();
+void timer_start();
 
 /**
 * @brief
 */
-int check_timer();
+int timer_out();

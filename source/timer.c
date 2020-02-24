@@ -3,16 +3,13 @@
 #define DUR 3
 
 static time_t end_time;
-static int enable = 0;
 
-void start_timer(){
+void timer_start(){
     end_time = time(NULL) + DUR;
-    enable = 1;
 }
 
-int check_timer(){
-    if(enable || (end_time < time(NULL))){
-        enable = 0;
+int timer_out(){
+    if(end_time < time(NULL)){
         return 1;
     }
     return 0;

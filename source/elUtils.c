@@ -44,9 +44,8 @@ int elUtils_read_order_button(){
     };
     
     for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
-        for(int i = 0; i < 3; i++){
-            HardwareOrder type = order_type[i];
-            if(hardware_read_order(f, type)){
+        for(int i = 0; i < HARDWARE_NUMBER_OF_ORDER_TYPES; i++){
+            if(hardware_read_order(f, order_type[i])){
                 return 1;
             }
         }

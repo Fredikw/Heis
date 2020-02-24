@@ -6,5 +6,6 @@
 #include "elFSM.h"
 
 int main(){
+    elFSM_run();
     return 0;
 }
