@@ -8,8 +8,8 @@
  * Kolbjørn Austreng
  */
 
+extern int timer_enable;
 
-#include <time.h>
 
 /**
 * @brief

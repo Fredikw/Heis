@@ -56,7 +56,7 @@ int elUtils_read_order_button(){
 int elUtils_check_if_arrived_floor(){
     for(int i = 0; i < HARDWARE_NUMBER_OF_FLOORS; i++){
         if(hardware_read_floor_sensor(i)){
-            return 1;
+            return i;
         }
     }
     return 0;
