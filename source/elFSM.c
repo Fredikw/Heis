@@ -36,7 +36,6 @@ HardwareMovement elFSM_set_direction_for_idel(struct Elevator *e){
                 if((e->floor) > i){
                     return HARDWARE_MOVEMENT_DOWN;
                 }
-                return HARDWARE_MOVEMENT_STOP;
             }
         }
     }
@@ -165,23 +164,34 @@ void elFSM_stop(struct Elevator *e){
         hardware_command_door_open(1);
         while(hardware_read_stop_signal());
         hardware_command_stop_light(0);
-        e->state = IDEL;
         e->state = DOOR_OPEN;
         timer_start();
         break;
     }
 }
 
+
 void elFSM_new_order(struct Elevator *e){
     elFSM_add_new_order(e);
-    
+
     switch (e->state)
     {
     case IDEL:
         e->direction = elFSM_set_direction_for_idel(e);
-        e->state = MOVING;
-        hardware_command_movement(e->direction);
-        break;
+        if(e->direction == HARDWARE_MOVEMENT_STOP)
+        {
+            e->state = DOOR_OPEN;
+            clear_order(e);
+            hardware_command_door_open(1);
+            timer_start();
+            break;
+        }
+        else
+        {
+            e->state = MOVING;
+            hardware_command_movement(e->direction);
+            break;
+        }
     default:
         break;
     }
@@ -258,7 +268,7 @@ void elFSM_run(){
     {
         if (hardware_read_stop_signal())
         {
-            hardware_command_movement(HARDWARE_MOVEMENT_STOP);
+            elFSM_stop(&el);
         }
         if (elUtils_read_order_button())
         {
