@@ -2,6 +2,27 @@
 
 typedef struct Elevator f;
 
+typedef enum {
+    IDEL,
+    MOVING,
+    DOOR_OPEN
+} ElevatorState;
+
+typedef enum {
+    FLOOR1,
+    FLOOR2,
+    FLOOR3,
+    FLOOR4
+} FloreType;
+
+struct Elevator 
+{
+    FloreType floor;
+    HardwareMovement direction;
+    int elevator_queue[4][3];
+    ElevatorState state;
+};
+
 void elFSM_init_elevator(struct Elevator *e);
 void elFSM_clear_order_queue(struct Elevator *e);
 HardwareMovement elFSM_set_direction_for_idel(struct Elevator *e);

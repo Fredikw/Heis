@@ -3,27 +3,6 @@
 #include "elUtils.h"
 #include "timer.h"
 
-typedef enum {
-    IDEL,
-    MOVING,
-    DOOR_OPEN
-} ElevatorState;
-
-typedef enum {
-    FLOOR1,
-    FLOOR2,
-    FLOOR3,
-    FLOOR4
-} FloreType;
-
-struct Elevator 
-{
-    FloreType floor;
-    HardwareMovement direction;
-    int elevator_queue[4][3];
-    ElevatorState state;
-};
-
 void elFSM_init_elevator(struct Elevator *e){
     elUtils_init_hardware();
     elFSM_clear_order_queue(e);
@@ -83,17 +62,20 @@ void elFSM_add_new_order(struct Elevator *e){
 
 void clear_order(struct Elevator *e){
     hardware_command_order_light(e->floor, HARDWARE_ORDER_INSIDE, 0);
+    e->elevator_queue[e->floor][1] = 0;
 
-    if(e->direction == HARDWARE_MOVEMENT_UP){
+    if(e->direction == HARDWARE_MOVEMENT_UP || e->floor == FLOOR1){
+        e->elevator_queue[e->floor][HARDWARE_MOVEMENT_UP] = 0;
         hardware_command_order_light(e->floor, HARDWARE_ORDER_UP, 0);
     }
-    if(e->direction == HARDWARE_MOVEMENT_DOWN){
+    if(e->direction == HARDWARE_MOVEMENT_DOWN || e->floor == FLOOR4){
         hardware_command_order_light(e->floor, HARDWARE_ORDER_DOWN, 0);
+        e->elevator_queue[e->floor][HARDWARE_MOVEMENT_DOWN] = 0;
     }
 }
 
 int elFSM_check_if_arrived_new_floor(struct Elevator *e){
-    if(e->floor != elUtils_check_if_arrived_floor()){
+    if((elUtils_check_if_at_floor() != 0) && e->floor != elUtils_check_current_floor()){
         return 1;
     }
     return 0;
@@ -111,6 +93,7 @@ int should_i_stop(struct Elevator *e){
         }
     }
     if((e->floor==FLOOR1) || (e->floor==FLOOR4)){
+        e->state = DOOR_OPEN;
         return 1;
     }
     return 0;
@@ -168,7 +151,7 @@ void elFSM_stop(struct Elevator *e){
     elUtils_clear_all_order_lights();
     elFSM_clear_order_queue(e);
 
-    switch (elUtils_check_if_arrived_floor())
+    switch (elUtils_check_if_at_floor())
     {
     case 0:
 
@@ -208,43 +191,37 @@ void elFSM_arrived_new_floor(struct Elevator *e){
     e->floor = elUtils_check_current_floor();
     hardware_command_floor_indicator_on(e->floor);
 
-    switch (should_i_stop(e))
-    {
-    case 1:
+    if(should_i_stop(e))
+    {   
         clear_order(e);
         e->state = DOOR_OPEN;
         hardware_command_movement(HARDWARE_MOVEMENT_STOP);
         hardware_command_door_open(1);
         timer_start();
-        break;
-    
-    case 0:
-        if(should_i_continue(e))
+    }
+
+    else if (should_i_continue(e)){}
+
+    else
+    {
+        if(e->direction == HARDWARE_MOVEMENT_UP)
         {
-            break;
-        }
-        else if(should_i_turn(e))
-        {
-            if(e->direction == HARDWARE_MOVEMENT_DOWN)
-            {
-                e->direction = HARDWARE_MOVEMENT_UP;
-                hardware_command_movement(HARDWARE_MOVEMENT_UP);
-            }
-            else
-            {
-                e->direction = HARDWARE_ORDER_DOWN;
-                hardware_command_movement(HARDWARE_MOVEMENT_DOWN);
-            }
+            e->direction = HARDWARE_ORDER_DOWN;
         }
         else
         {
-            e->state = IDEL;
-            e->direction = HARDWARE_MOVEMENT_STOP;
+            e->direction = HARDWARE_ORDER_UP;
         }
+        clear_order(e);
+        e->state = DOOR_OPEN;
+        hardware_command_movement(HARDWARE_MOVEMENT_STOP);
+        hardware_command_door_open(1);
+        timer_start();
     }
 }
 
 void elFSM_time_out(struct Elevator *e){
+    timer_enable = 0;
     hardware_command_door_open(0);
     if(should_i_continue(e))
     {
@@ -277,36 +254,27 @@ void elFSM_time_out(struct Elevator *e){
 void elFSM_run(){
     struct Elevator el;
     elFSM_init_elevator(&el);
-    el.direction = HARDWARE_MOVEMENT_UP;
-    el.state = MOVING;
-    el.elevator_queue[2][2] = 1;
-    elFSM_check_if_arrived_new_floor(&el);
-    elFSM_arrived_new_floor(&el);
-    if (timer_out() && timer_enable){
-        elFSM_time_out(&el);
-    }
-
-    // do
-    // {
-    //     if (hardware_read_stop_signal())
-    //     {
-    //         hardware_command_movement(HARDWARE_MOVEMENT_STOP);
-    //     }
-    //     if (elUtils_read_order_button())
-    //     {
-    //         elFSM_new_order(&el);
-    //     }
-    //     if (elFSM_check_if_arrived_new_floor(&el))
-    //     {
-    //         elFSM_arrived_new_floor(&el);
-    //     }
-    //     if (timer_out() && timer_enable)
-    //     {
-    //         elFSM_time_out(&el);
-    //     }
-    //     if (hardware_read_obstruction_signal() && el.state ==DOOR_OPEN)
-    //     {
-    //         timer_start();
-    //     }
-    // } while (1);
+    do
+    {
+        if (hardware_read_stop_signal())
+        {
+            hardware_command_movement(HARDWARE_MOVEMENT_STOP);
+        }
+        if (elUtils_read_order_button())
+        {
+            elFSM_new_order(&el);
+        }
+        if (elFSM_check_if_arrived_new_floor(&el))
+        {
+            elFSM_arrived_new_floor(&el);
+        }
+        if (timer_out() && timer_enable)
+        {
+            elFSM_time_out(&el);
+        }
+        if (hardware_read_obstruction_signal() && el.state == DOOR_OPEN)
+        {
+            timer_start();
+        }
+    } while (1);
 }

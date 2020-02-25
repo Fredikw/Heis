@@ -3,7 +3,7 @@
 #define DUR 3
 
 static time_t end_time;
-int timer_enable = 0;
+int timer_enable;
 
 void timer_start(){
     end_time = time(NULL) + DUR;
@@ -12,7 +12,6 @@ void timer_start(){
 
 int timer_out(){
     if(end_time < time(NULL)){
-        timer_enable = 0;
         return 1;
     }
     return 0;

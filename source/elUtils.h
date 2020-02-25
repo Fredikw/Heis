@@ -32,7 +32,7 @@ int elUtils_read_order_button();
  * @brief Checks if elevator reached a floor.
  * @return 1 if true.
  */
-int elUtils_check_if_arrived_floor();
+int elUtils_check_if_at_floor();
 
 /**
  * @return an integer corresponding to current floor.

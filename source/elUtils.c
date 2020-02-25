@@ -53,10 +53,10 @@ int elUtils_read_order_button(){
     return 0;
 }
 
-int elUtils_check_if_arrived_floor(){
+int elUtils_check_if_at_floor(){
     for(int i = 0; i < HARDWARE_NUMBER_OF_FLOORS; i++){
         if(hardware_read_floor_sensor(i)){
-            return i;
+            return 1;
         }
     }
     return 0;
