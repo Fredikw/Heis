@@ -52,7 +52,9 @@ void elFSM_add_new_order(struct Elevator *e){
     for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
         for(int i = 0; i < HARDWARE_NUMBER_OF_ORDER_TYPES; i++){
             if(hardware_read_order(f, i)){
-                e->elevator_queue[f][i] = 1;
+                if(!(elUtils_check_if_at_floor() && f == e->floor)){
+                    e->elevator_queue[f][i] = 1;
+                }
                 hardware_command_order_light(f, order_types[i], 1);
             }
         }
@@ -60,16 +62,9 @@ void elFSM_add_new_order(struct Elevator *e){
 }
 
 void clear_order(struct Elevator *e){
-    hardware_command_order_light(e->floor, HARDWARE_ORDER_INSIDE, 0);
-    e->elevator_queue[e->floor][1] = 0;
-
-    if(e->direction == HARDWARE_MOVEMENT_UP || e->floor == FLOOR1){
-        e->elevator_queue[e->floor][HARDWARE_MOVEMENT_UP] = 0;
-        hardware_command_order_light(e->floor, HARDWARE_ORDER_UP, 0);
-    }
-    if(e->direction == HARDWARE_MOVEMENT_DOWN || e->floor == FLOOR4){
-        hardware_command_order_light(e->floor, HARDWARE_ORDER_DOWN, 0);
-        e->elevator_queue[e->floor][HARDWARE_MOVEMENT_DOWN] = 0;
+    for(int i = 0; i < HARDWARE_NUMBER_OF_ORDER_TYPES; i++){
+        e->elevator_queue[e->floor][i] = 0;
+        hardware_command_order_light(e->floor, i, 0);
     }
 }
 
@@ -201,61 +196,35 @@ void elFSM_arrived_new_floor(struct Elevator *e){
     e->floor = elUtils_check_current_floor();
     hardware_command_floor_indicator_on(e->floor);
 
-    if(should_i_stop(e))
-    {   
-        clear_order(e);
-        e->state = DOOR_OPEN;
-        hardware_command_movement(HARDWARE_MOVEMENT_STOP);
-        hardware_command_door_open(1);
-        timer_start();
-    }
-
-    else if (should_i_continue(e)){}
-
-    else
+    switch (should_i_stop(e))
     {
-        if(e->direction == HARDWARE_MOVEMENT_UP)
-        {
-            e->direction = HARDWARE_ORDER_DOWN;
-        }
-        else
-        {
-            e->direction = HARDWARE_ORDER_UP;
-        }
+    case 1:
         clear_order(e);
         e->state = DOOR_OPEN;
         hardware_command_movement(HARDWARE_MOVEMENT_STOP);
         hardware_command_door_open(1);
         timer_start();
+        break;
+    
+    default:
+        break;
     }
 }
 
 void elFSM_time_out(struct Elevator *e){
     timer_enable = 0;
     hardware_command_door_open(0);
-    if(should_i_continue(e))
+
+    switch (should_i_continue(e))
     {
+    case 1:
         e->state = MOVING;
         hardware_command_movement(e->direction);
-    }
-    else if(should_i_turn(e))
-    {
-        e->state = MOVING;
-        if(e->direction == HARDWARE_MOVEMENT_DOWN)
-        {
-            e->direction = HARDWARE_MOVEMENT_UP;
-            hardware_command_movement(HARDWARE_MOVEMENT_UP);
-        }
-        else
-        {
-            e->direction = HARDWARE_ORDER_DOWN;
-            hardware_command_movement(HARDWARE_MOVEMENT_DOWN);
-        }
-    }
-    else
-    {
+        break;
+    
+    default:
         e->state = IDEL;
-        e->direction = HARDWARE_MOVEMENT_STOP;
+        break;
     }
 }
 
