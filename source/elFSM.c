@@ -54,8 +54,8 @@ void elFSM_add_new_order(struct Elevator *e){
             if(hardware_read_order(f, i)){
                 if(!(elUtils_check_if_at_floor() && f == e->floor)){
                     e->elevator_queue[f][i] = 1;
+                    hardware_command_order_light(f, order_types[i], 1);
                 }
-                hardware_command_order_light(f, order_types[i], 1);
             }
         }
     }
@@ -77,12 +77,12 @@ int elFSM_check_if_arrived_new_floor(struct Elevator *e){
 
 int should_i_stop(struct Elevator *e){
     if(e->direction == HARDWARE_MOVEMENT_UP){
-        if(e->elevator_queue[e->floor][0] || e->elevator_queue[e->floor][1]){
+        if(e->elevator_queue[e->floor][0] || e->elevator_queue[e->floor][1] || !should_i_continue(e)){
             return 1;
         }
     }
     if(e->direction == HARDWARE_MOVEMENT_DOWN){
-        if(e->elevator_queue[e->floor][1] || e->elevator_queue[e->floor][2]){
+        if(e->elevator_queue[e->floor][1] || e->elevator_queue[e->floor][2] || !should_i_continue(e)){
             return 1;
         }
     }
@@ -151,7 +151,14 @@ void elFSM_stop(struct Elevator *e){
 
         while(hardware_read_stop_signal());
         hardware_command_stop_light(0);
-
+        
+        while(!hardware_read_floor_sensor(0))
+        {
+            hardware_command_movement(HARDWARE_MOVEMENT_DOWN);
+        }
+        hardware_command_movement(HARDWARE_MOVEMENT_STOP);
+        e->floor = elUtils_check_current_floor();
+        e->direction = HARDWARE_MOVEMENT_DOWN;
         e->state = IDEL;
         break;
     
@@ -215,19 +222,26 @@ void elFSM_time_out(struct Elevator *e){
     timer_enable = 0;
     hardware_command_door_open(0);
 
-    switch (should_i_continue(e))
-    {
-    case 1:
+    if (should_i_continue(e)){
         e->state = MOVING;
         hardware_command_movement(e->direction);
-        break;
-    
-    default:
+    }
+
+    else if(should_i_turn(e)){
+        if(e->direction == HARDWARE_MOVEMENT_UP){
+            e->direction = HARDWARE_ORDER_DOWN;
+        }
+        else
+        {
+            e->direction = HARDWARE_MOVEMENT_UP;
+        }
+        hardware_command_movement(e->direction);
+    }
+    else
+    {
         e->state = IDEL;
-        break;
     }
 }
-
 //--------------------------------------------------------------------------------//
 
 void elFSM_run(){
