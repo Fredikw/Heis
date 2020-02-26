@@ -152,7 +152,7 @@ void elFSM_stop(struct Elevator *e){
         while(hardware_read_stop_signal());
         hardware_command_stop_light(0);
         
-        while(!hardware_read_floor_sensor(0))
+        while(!elUtils_check_if_at_floor())
         {
             hardware_command_movement(HARDWARE_MOVEMENT_DOWN);
         }
