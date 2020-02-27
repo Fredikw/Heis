@@ -151,14 +151,7 @@ void elFSM_stop(struct Elevator *e){
 
         while(hardware_read_stop_signal());
         hardware_command_stop_light(0);
-        
-        while(!elUtils_check_if_at_floor())
-        {
-            hardware_command_movement(HARDWARE_MOVEMENT_DOWN);
-        }
-        hardware_command_movement(HARDWARE_MOVEMENT_STOP);
-        e->floor = elUtils_check_current_floor();
-        e->direction = HARDWARE_MOVEMENT_DOWN;
+
         e->state = IDEL;
         break;
     
@@ -179,14 +172,32 @@ void elFSM_new_order(struct Elevator *e){
     switch (e->state)
     {
     case IDEL:
-        e->direction = elFSM_set_direction_for_idel(e);
-        if(e->direction == HARDWARE_MOVEMENT_STOP)
-        {
+        HardwareMovement NEXT_MOVEMENT = elFSM_set_direction_for_idel(e);
+
+        if(NEXT_MOVEMENT == HARDWARE_MOVEMENT_STOP && elUtils_check_if_at_floor()){
+            e->direction = NEXT_MOVEMENT;
             e->state = DOOR_OPEN;
             clear_order(e);
             hardware_command_door_open(1);
             timer_start();
             break;
+        }
+        else if(NEXT_MOVEMENT == HARDWARE_MOVEMENT_STOP && !elUtils_check_if_at_floor())
+        {
+            if(e->direction == HARDWARE_MOVEMENT_UP){
+                e->direction = HARDWARE_MOVEMENT_DOWN;
+                e->state = MOVING;
+                hardware_command_movement(e->direction);
+                break;
+            }
+            else
+            {
+                e->direction = HARDWARE_MOVEMENT_UP;
+                e->state = MOVING;
+                hardware_command_movement(e->direction);
+                break;
+            }
+            
         }
         else
         {
@@ -239,6 +250,7 @@ void elFSM_time_out(struct Elevator *e){
     }
     else
     {
+        e->direction = HARDWARE_MOVEMENT_STOP;
         e->state = IDEL;
     }
 }
