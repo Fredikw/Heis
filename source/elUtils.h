@@ -1,40 +1,41 @@
-/**
- * @file
- * @brief Driver for the elevator hardware.
- *
- * Neatly wraps up Martin Korsgaard's spaghetti
- * from 2006 ;)
- *
- * Kolbjørn Austreng
- */
-#pragma once
 #include "hardware.h"
 
-/**
- * @brief Initializes the elevator control hardware.
- * Commands the elevator to move to floor 1.
- * Commands the hardware to turn on the floor indicator for floor 1.
- */
-void elUtils_init_hardware();
+typedef enum {
+    IDEL,
+    MOVING,
+    DOOR_OPEN
+} ElevatorState;
 
-/**
- * @brief clears all order lights
- */
-void elUtils_clear_all_order_lights();
+typedef enum {
+    FLOOR1,
+    FLOOR2,
+    FLOOR3,
+    FLOOR4,
+    UNDEFINED
+} FloreType;
 
-/**
- * @brief Polls the hardware for orders
- * @return 1 on oder.
- */
-int elUtils_read_order_button();
+struct Elevator 
+{
+    FloreType floor;
+    HardwareMovement direction;
+    int elevator_queue[4][3];
+    ElevatorState state;
+};
 
-/**
- * @brief Checks if elevator reached a floor.
- * @return 1 if true.
- */
-int elUtils_check_if_at_floor();
+void elUtils_init_elevator(struct Elevator *e);
 
-/**
- * @return an integer corresponding to current floor.
- */
-int elUtils_check_current_floor();
+void elUtils_clear_order_queue(struct Elevator *e);
+
+HardwareMovement elUtils_set_direction_for_idel(struct Elevator *e);
+
+void elUtils_add_new_order(struct Elevator *e);
+
+void elUtils_clear_order(struct Elevator *e);
+
+int elFSM_check_if_arrived_new_floor(struct Elevator *e);
+
+int should_i_stop(struct Elevator *e);
+
+int should_i_continue(struct Elevator *e);
+
+int should_i_turn(struct Elevator *e);

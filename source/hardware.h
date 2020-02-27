@@ -111,7 +111,6 @@ void hardware_command_floor_indicator_on(int floor);
  */
 void hardware_command_stop_light(int on);
 
-
 /**
  * @brief Sets the light in a button corresponding to an order
  * of type @p order_type, at floor @p floor.
@@ -122,5 +121,28 @@ void hardware_command_stop_light(int on);
  * 0 to turn it off.
  */
 void hardware_command_order_light(int floor, HardwareOrder order_type, int on);
+
+/**
+ * @brief clears all order lights
+ */
+void hardware_command_clear_all_order_lights();
+
+/**
+ * @brief Polls the hardware for the status of orders from
+ * all floors.
+ * @return 1 if there is an order at any floor.
+ */
+int hardware_read_all_orders();
+
+/**
+ * @brief Polls the floor sensor for all floors.
+ * @return 1 if the elevator is at any floor.
+ */
+int hardware_read_all_floor_sensors();
+
+/**
+ * @return an integer corresponding to current floor.
+ */
+int hardware_read_current_floor();
 
 #endif
