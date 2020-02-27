@@ -172,18 +172,18 @@ void elFSM_new_order(struct Elevator *e){
     switch (e->state)
     {
     case IDEL:
-        HardwareMovement NEXT_MOVEMENT = elFSM_set_direction_for_idel(e);
 
-        if(NEXT_MOVEMENT == HARDWARE_MOVEMENT_STOP && elUtils_check_if_at_floor()){
-            e->direction = NEXT_MOVEMENT;
+        if(elFSM_set_direction_for_idel(e) == HARDWARE_MOVEMENT_STOP && elUtils_check_if_at_floor()){
+            e->direction = elFSM_set_direction_for_idel(e);
             e->state = DOOR_OPEN;
             clear_order(e);
             hardware_command_door_open(1);
             timer_start();
             break;
         }
-        else if(NEXT_MOVEMENT == HARDWARE_MOVEMENT_STOP && !elUtils_check_if_at_floor())
+        else if(elFSM_set_direction_for_idel(e) == HARDWARE_MOVEMENT_STOP && !elUtils_check_if_at_floor())
         {
+            e->floor = UNDEFINED;
             if(e->direction == HARDWARE_MOVEMENT_UP){
                 e->direction = HARDWARE_MOVEMENT_DOWN;
                 e->state = MOVING;
@@ -201,6 +201,7 @@ void elFSM_new_order(struct Elevator *e){
         }
         else
         {
+            e->direction = elFSM_set_direction_for_idel(e);
             e->state = MOVING;
             hardware_command_movement(e->direction);
             break;

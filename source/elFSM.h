@@ -12,7 +12,8 @@ typedef enum {
     FLOOR1,
     FLOOR2,
     FLOOR3,
-    FLOOR4
+    FLOOR4,
+    UNDEFINED
 } FloreType;
 
 struct Elevator 
