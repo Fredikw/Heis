@@ -1,4 +1,4 @@
-SOURCES := main.c elFSM.c elUtils.c timer.c
+SOURCES := main.c FSM.c elUtils.c timer.c
 
 SOURCE_DIR := source
 BUILD_DIR := build

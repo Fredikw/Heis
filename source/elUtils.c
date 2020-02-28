@@ -75,8 +75,8 @@ void elUtils_clear_order(struct Elevator *e){
     }
 }
 
-int elFSM_check_if_arrived_new_floor(struct Elevator *e){
-    if((hardware_read_all_floor_sensors() != 0) && e->floor != hardware_read_current_floor()){
+int elUtils_read_new_floor(struct Elevator *e){
+    if(hardware_read_all_floor_sensors() && e->floor != hardware_read_current_floor()){
         return 1;
     }
     return 0;
@@ -93,27 +93,23 @@ int should_i_stop(struct Elevator *e){
             return 1;
         }
     }
-    if((e->floor==FLOOR1) || (e->floor==FLOOR4)){
-        e->state = DOOR_OPEN;
-        return 1;
-    }
     return 0;
 }
 
 int should_i_continue(struct Elevator *e){
     if(e->direction == HARDWARE_MOVEMENT_UP){
-        for(int i = (e->floor)+1; i < HARDWARE_NUMBER_OF_FLOORS; i++){
-            for(int j = 0; j < HARDWARE_NUMBER_OF_ORDER_TYPES; j++){
-                if(e->elevator_queue[i][j]){
+        for(int f = (e->floor)+1; f < HARDWARE_NUMBER_OF_FLOORS; f++){
+            for(int i = 0; i < HARDWARE_NUMBER_OF_ORDER_TYPES; i++){
+                if(e->elevator_queue[f][i]){
                     return 1;
                 }
             }
         }
     }
     if(e->direction == HARDWARE_MOVEMENT_DOWN){
-        for(int i = (e->floor)-1; i >= FLOOR1; i--){
-            for(int j = 0; j < HARDWARE_NUMBER_OF_ORDER_TYPES; j++){
-                if(e->elevator_queue[i][j]){
+        for(int f = (e->floor)-1; f >= FLOOR1; f--){
+            for(int i = 0; i < HARDWARE_NUMBER_OF_ORDER_TYPES; i++){
+                if(e->elevator_queue[f][i]){
                     return 1;
                 }
             }
@@ -124,18 +120,18 @@ int should_i_continue(struct Elevator *e){
 
 int should_i_turn(struct Elevator *e){
     if(e->direction == HARDWARE_MOVEMENT_UP){
-        for(int i = (e->floor)-1; i >= FLOOR1; i--){
-            for(int j = 0; j < HARDWARE_NUMBER_OF_ORDER_TYPES; j++){
-                if(e->elevator_queue[i][j]){
+        for(int f = (e->floor)-1; f >= FLOOR1; f--){
+            for(int i = 0; i < HARDWARE_NUMBER_OF_ORDER_TYPES; i++){
+                if(e->elevator_queue[f][i]){
                     return 1;
                 }
             }
         }
     }
     if(e->direction == HARDWARE_MOVEMENT_DOWN){
-        for(int i = (e->floor)+1; i < HARDWARE_NUMBER_OF_FLOORS; i++){
-            for(int j = 0; j < HARDWARE_NUMBER_OF_ORDER_TYPES; j++){
-                if(e->elevator_queue[i][j]){
+        for(int f = (e->floor)+1; f < HARDWARE_NUMBER_OF_FLOORS; f++){
+            for(int i = 0; i < HARDWARE_NUMBER_OF_ORDER_TYPES; i++){
+                if(e->elevator_queue[f][i]){
                     return 1;
                 }
             }

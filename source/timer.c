@@ -1,6 +1,6 @@
 #include "timer.h"
 #include <time.h>
-#define DUR 3
+#define DUR 1
 
 static time_t end_time;
 int timer_enable;

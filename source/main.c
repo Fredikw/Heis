@@ -1,4 +1,4 @@
-#include "elFSM.h"
+#include "FSM.h"
 
 int main(){
     FSM_run();

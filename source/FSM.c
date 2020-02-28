@@ -1,5 +1,5 @@
 #include "hardware.h"
-#include "elFSM.h"
+#include "FSM.h"
 #include "timer.h"
 
 void FSM_stop(struct Elevator *e){
@@ -33,17 +33,19 @@ void FSM_new_order(struct Elevator *e){
 
     switch (e->state)
     {
-    case IDEL:
+    case IDEL:;
 
-        if(elUtils_set_direction_for_idel(e) == HARDWARE_MOVEMENT_STOP && hardware_read_all_floor_sensors()){
-            e->direction = elUtils_set_direction_for_idel(e);
+        HardwareMovement NEXT_MOVEMENT = elUtils_set_direction_for_idel(e);
+
+        if(NEXT_MOVEMENT == HARDWARE_MOVEMENT_STOP && hardware_read_all_floor_sensors()){
+            e->direction = NEXT_MOVEMENT;
             e->state = DOOR_OPEN;
             elUtils_clear_order(e);
             hardware_command_door_open(1);
             timer_start();
             break;
         }
-        else if(elUtils_set_direction_for_idel(e) == HARDWARE_MOVEMENT_STOP && !hardware_read_all_floor_sensors())
+        else if(NEXT_MOVEMENT == HARDWARE_MOVEMENT_STOP && !hardware_read_all_floor_sensors())
         {
             e->floor = UNDEFINED;
             if(e->direction == HARDWARE_MOVEMENT_UP){
@@ -63,7 +65,7 @@ void FSM_new_order(struct Elevator *e){
         }
         else
         {
-            e->direction = elUtils_set_direction_for_idel(e);
+            e->direction = NEXT_MOVEMENT;
             e->state = MOVING;
             hardware_command_movement(e->direction);
             break;
@@ -109,6 +111,7 @@ void FSM_time_out(struct Elevator *e){
         {
             e->direction = HARDWARE_MOVEMENT_UP;
         }
+        e->state = MOVING;
         hardware_command_movement(e->direction);
     }
     else
@@ -131,7 +134,7 @@ void FSM_run(){
         {
             FSM_new_order(&el);
         }
-        if (elFSM_check_if_arrived_new_floor(&el))
+        if (elUtils_read_new_floor(&el))
         {
             FSM_arrived_new_floor(&el);
         }

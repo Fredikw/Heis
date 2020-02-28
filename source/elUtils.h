@@ -32,7 +32,7 @@ void elUtils_add_new_order(struct Elevator *e);
 
 void elUtils_clear_order(struct Elevator *e);
 
-int elFSM_check_if_arrived_new_floor(struct Elevator *e);
+int elUtils_read_new_floor(struct Elevator *e);
 
 int should_i_stop(struct Elevator *e);
 
