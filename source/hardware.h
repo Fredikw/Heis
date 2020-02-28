@@ -2,9 +2,6 @@
  * @file
  * @brief Driver for the elevator hardware.
  *
- * Neatly wraps up Martin Korsgaard's spaghetti
- * from 2006 ;)
- *
  * Kolbjørn Austreng
  */
 #ifndef HARDWARE_H

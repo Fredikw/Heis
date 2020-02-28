@@ -47,8 +47,8 @@ void FSM_new_order(struct Elevator *e){
         }
         else if(NEXT_MOVEMENT == HARDWARE_MOVEMENT_STOP && !hardware_read_all_floor_sensors())
         {
-            e->floor = UNDEFINED;
             if(e->direction == HARDWARE_MOVEMENT_UP){
+                e->floor += 1;
                 e->direction = HARDWARE_MOVEMENT_DOWN;
                 e->state = MOVING;
                 hardware_command_movement(e->direction);
@@ -56,12 +56,12 @@ void FSM_new_order(struct Elevator *e){
             }
             else
             {
+                e->floor -= 1;
                 e->direction = HARDWARE_MOVEMENT_UP;
                 e->state = MOVING;
                 hardware_command_movement(e->direction);
                 break;
             }
-            
         }
         else
         {
