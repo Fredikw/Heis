@@ -54,7 +54,7 @@ HardwareMovement elUtils_set_direction_for_idel(struct Elevator *e);
 void elUtils_add_new_order(struct Elevator *e);
 
 /**
- * @brief Clears all orders at the current floor.
+ * @brief Clears all orders at the current floor from elevator queue matrix.
  */
 void elUtils_clear_order(struct Elevator *e);
 
@@ -66,7 +66,7 @@ int elUtils_read_new_floor(struct Elevator *e);
 
 /**
  * @brief Polls the elevator queue matrix for orders at current floor.
- * @return 1 if there is an order from inside the cabin,
+ * @return 1 if there is an order from inside the cabin for current floor,
  * or outside in the same direction as the movement of the cabine.
  */
 int should_i_stop(struct Elevator *e);
@@ -80,7 +80,7 @@ int should_i_continue(struct Elevator *e);
 
 /**
  * @brief Polls the elevator queue matrix for orders in the opposite 
- * direction as the movement of the cabine.
+ * direction of the movement of the cabine.
  * @return 1 on success, 0 otherwise.
  */
 int should_i_turn(struct Elevator *e);
