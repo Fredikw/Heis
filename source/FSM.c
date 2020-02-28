@@ -79,7 +79,7 @@ void FSM_arrived_new_floor(struct Elevator *e){
     e->floor = hardware_read_current_floor();
     hardware_command_floor_indicator_on(e->floor);
 
-    switch (should_i_stop(e))
+    switch (elUtils_should_i_stop(e))
     {
     case 1:
         elUtils_clear_order(e);
@@ -98,12 +98,12 @@ void FSM_time_out(struct Elevator *e){
     timer_enable = 0;
     hardware_command_door_open(0);
 
-    if (should_i_continue(e)){
+    if (elUtils_should_i_continue(e)){
         e->state = MOVING;
         hardware_command_movement(e->direction);
     }
 
-    else if(should_i_turn(e)){
+    else if(elUtils_should_i_turn(e)){
         if(e->direction == HARDWARE_MOVEMENT_UP){
             e->direction = HARDWARE_ORDER_DOWN;
         }

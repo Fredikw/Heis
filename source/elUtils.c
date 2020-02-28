@@ -76,27 +76,27 @@ void elUtils_clear_order(struct Elevator *e){
 }
 
 int elUtils_read_new_floor(struct Elevator *e){
-    if(hardware_read_all_floor_sensors() && e->floor != hardware_read_current_floor()){
+    if(e->floor != hardware_read_current_floor() && hardware_read_all_floor_sensors()){
         return 1;
     }
     return 0;
 }
 
-int should_i_stop(struct Elevator *e){
+int elUtils_should_i_stop(struct Elevator *e){
     if(e->direction == HARDWARE_MOVEMENT_UP){
-        if(e->elevator_queue[e->floor][0] || e->elevator_queue[e->floor][1] || !should_i_continue(e)){
+        if(e->elevator_queue[e->floor][0] || e->elevator_queue[e->floor][1] || !elUtils_should_i_continue(e)){
             return 1;
         }
     }
     if(e->direction == HARDWARE_MOVEMENT_DOWN){
-        if(e->elevator_queue[e->floor][1] || e->elevator_queue[e->floor][2] || !should_i_continue(e)){
+        if(e->elevator_queue[e->floor][1] || e->elevator_queue[e->floor][2] || !elUtils_should_i_continue(e)){
             return 1;
         }
     }
     return 0;
 }
 
-int should_i_continue(struct Elevator *e){
+int elUtils_should_i_continue(struct Elevator *e){
     if(e->direction == HARDWARE_MOVEMENT_UP){
         for(int f = (e->floor)+1; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             for(int i = 0; i < HARDWARE_NUMBER_OF_ORDER_TYPES; i++){
@@ -118,7 +118,7 @@ int should_i_continue(struct Elevator *e){
     return 0;
 }
 
-int should_i_turn(struct Elevator *e){
+int elUtils_should_i_turn(struct Elevator *e){
     if(e->direction == HARDWARE_MOVEMENT_UP){
         for(int f = (e->floor)-1; f >= FLOOR1; f--){
             for(int i = 0; i < HARDWARE_NUMBER_OF_ORDER_TYPES; i++){
