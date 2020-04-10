@@ -1,7 +1,0 @@
-<map id="source/hardware.h" name="source/hardware.h">
-<area shape="rect" id="node2" href="$elUtils_8c_source.html" title="source/elUtils.c" alt="" coords="5,155,119,181"/>
-<area shape="rect" id="node3" href="$elUtils_8h.html" title="Utilities for the elevator system. " alt="" coords="125,80,239,107"/>
-<area shape="rect" id="node5" href="$FSM_8c_source.html" title="source/FSM.c" alt="" coords="233,229,337,256"/>
-<area shape="rect" id="node4" href="$FSM_8h.html" title="Final state machine for elevator. " alt="" coords="143,155,247,181"/>
-<area shape="rect" id="node6" href="$main_8c_source.html" title="source/main.c" alt="" coords="105,229,209,256"/>
-</map>
