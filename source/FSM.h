@@ -9,13 +9,13 @@
 
 /**
  * @brief Executes if @c hardware_read_stop_signal, is set high.
- * Clears order queue and all oder lights, and sets elevator state to idel.
+ * Clears order queue and all oder lights, and sets elevator state to idle.
  */
 void FSM_stop(struct Elevator *e);
 
 /**
  * @brief Adds new order to elevator order matrix.
- * If the state of the elevator is idel. The elevator determines the proper direction
+ * If the state of the elevator is idle. The elevator determines the proper direction
  * based on whether the elevator is at a floor or between two floors.
  */
 void FSM_new_order(struct Elevator *e);
@@ -24,7 +24,7 @@ void FSM_new_order(struct Elevator *e);
  * @brief Executes at experation of timer.
  * Determines if the cabine should continue or change direction by @c should_i_continue, and @c should_i_turn 
  * respectively in that order. 
- * If not, the elevator goes to idel. For every case the cabin state parameters are set accordingly.
+ * If not, the elevator goes to idle. For every case the cabin state parameters are set accordingly.
  */
 void FSM_time_out(struct Elevator *e);
 

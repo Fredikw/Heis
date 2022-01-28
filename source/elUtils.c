@@ -20,7 +20,7 @@ void elUtils_init_elevator(struct Elevator *e){
     }
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     
-    e->state = IDEL;
+    e->state = IDLE;
     e->floor = FLOOR1;
     e->direction = HARDWARE_MOVEMENT_STOP;
 }
@@ -33,7 +33,7 @@ void elUtils_clear_order_queue(struct Elevator *e){
     }
 }
 
-HardwareMovement elUtils_set_direction_for_idel(struct Elevator *e){
+HardwareMovement elUtils_set_direction_for_idle(struct Elevator *e){
     for(int i = 0; i < HARDWARE_NUMBER_OF_FLOORS; i++){
         for(int j = 0; j < HARDWARE_NUMBER_OF_ORDER_TYPES; j++){
             if(e->elevator_queue[i][j]){

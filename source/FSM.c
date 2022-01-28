@@ -15,7 +15,7 @@ void FSM_stop(struct Elevator *e){
         while(hardware_read_stop_signal());
         hardware_command_stop_light(0);
 
-        e->state = IDEL;
+        e->state = IDLE;
         break;
     
     default:
@@ -33,9 +33,9 @@ void FSM_new_order(struct Elevator *e){
 
     switch (e->state)
     {
-    case IDEL:;
+    case IDLE:;
 
-        HardwareMovement NEXT_MOVEMENT = elUtils_set_direction_for_idel(e);
+        HardwareMovement NEXT_MOVEMENT = elUtils_set_direction_for_idle(e);
 
         if(NEXT_MOVEMENT == HARDWARE_MOVEMENT_STOP && hardware_read_all_floor_sensors()){
             e->direction = NEXT_MOVEMENT;
@@ -117,7 +117,7 @@ void FSM_time_out(struct Elevator *e){
     else
     {
         e->direction = HARDWARE_MOVEMENT_STOP;
-        e->state = IDEL;
+        e->state = IDLE;
     }
 }
 

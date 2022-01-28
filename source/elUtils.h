@@ -8,7 +8,7 @@
 #include "hardware.h"
 
 typedef enum {
-    IDEL,
+    IDLE,
     MOVING,
     DOOR_OPEN
 } ElevatorState;
@@ -33,7 +33,7 @@ struct Elevator
 
 /**
  * @brief An extension of @c hardware_init
- * Commands the elevator to move to first floor and go to idel.
+ * Commands the elevator to move to first floor and go to idle.
  */
 void elUtils_init_elevator(struct Elevator *e);
 
@@ -46,7 +46,7 @@ void elUtils_clear_order_queue(struct Elevator *e);
  * @brief Polls the elevator queue matrix for orders.
  * @return Direction for movement according to first order.
  */
-HardwareMovement elUtils_set_direction_for_idel(struct Elevator *e);
+HardwareMovement elUtils_set_direction_for_idle(struct Elevator *e);
 
 /**
  * @brief Adds new order to elevator queue matrix.
